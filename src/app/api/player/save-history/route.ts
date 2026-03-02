@@ -2,6 +2,8 @@ import { syncHistory } from "@/actions/histories";
 import { UnifiedPlayerEventData } from "@/hooks/usePlayerEvents";
 import { NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 type ResponseBody = UnifiedPlayerEventData & { completed?: boolean };
 
 export const POST = async (request: Request) => {

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const runtime = "edge";
+
 const API_BASE = "https://upnshare.com";
 const API_TOKEN = "f6335d071b5b4ed82bace91d";
 
