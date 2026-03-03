@@ -46,7 +46,7 @@ const HeaderSearch = () => {
     <SearchInput
       value={query}
       onChange={handleSearch}
-      className="w-40"
+      className="w-48 md:w-64 lg:w-80"
       placeholder="Search..."
     />
   );
@@ -83,14 +83,14 @@ const TopNavbar = () => {
         ))}
       </nav>
       
-      <NavbarContent justify="end" className="gap-2">
-        <NavbarItem>
+      <NavbarContent justify="end" className="gap-4 md:gap-6">
+        <NavbarItem className="mr-2 md:mr-4">
           <HeaderSearch />
         </NavbarItem>
         <NavbarItem className="flex lg:hidden">
           <NavbarMenuToggle aria-label={isMenuOpen ? "Close menu" : "Open menu"} />
         </NavbarItem>
-        <NavbarItem className="hidden lg:flex gap-2">
+        <NavbarItem className="hidden lg:flex gap-4">
           <ThemeSwitchDropdown />
           <UserProfileButton />
         </NavbarItem>
