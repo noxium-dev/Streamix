@@ -77,7 +77,7 @@ const VideoDetailPage = () => {
   if (isPending) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" label="Loading video details..." />
+        <Spinner size="lg" color="primary" />
       </div>
     );
   }

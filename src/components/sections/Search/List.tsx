@@ -117,7 +117,6 @@ const SearchList = () => {
                 color="primary"
                 size="lg"
                 variant="wave"
-                label="Loading more..."
               />
             )}
             {!isEmpty(data?.pages[0]?.data) && !hasNextPage && !isPending && (

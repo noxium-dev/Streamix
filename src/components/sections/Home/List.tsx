@@ -36,7 +36,6 @@ const HomePageList: React.FC = () => {
               size="lg"
               className="mt-20 self-center"
               color="primary"
-              label="Loading content..."
             />
           }
         >

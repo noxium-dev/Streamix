@@ -21,7 +21,7 @@ const GenresPage = () => {
 
       {isPending ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <Spinner size="lg" color="primary" label="Loading genres..." />
+          <Spinner size="lg" color="primary" />
         </div>
       ) : genres?.length === 0 ? (
         <div className="flex min-h-[30vh] flex-col items-center justify-center border-2 border-dashed border-divider rounded-3xl text-default-400">

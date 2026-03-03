@@ -18,8 +18,7 @@ const DiscoverList = () => {
     <div className="flex flex-col gap-6 py-2 min-h-[70vh]">
       {isPending ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-          <Spinner size="lg" color="primary" labelColor="primary" label="Loading collection..." />
-          <p className="animate-pulse text-sm text-default-400">Fetching the latest content for you</p>
+          <Spinner size="lg" color="primary" />
         </div>
       ) : (
         <>

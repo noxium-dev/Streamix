@@ -16,12 +16,14 @@ import TosPage from './app/tos/page';
 import SearchPage from './app/search/page';
 import NotFound from './app/not-found';
 
+import { Spinner } from "@heroui/react";
+
 const App = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <TopNavbar />
       <main className="mx-auto w-full max-w-[1600px] px-4 md:px-6 py-6 flex-grow">
-        <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]">Loading...</div>}>
+        <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]"><Spinner size="lg" color="primary" /></div>}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/watch/:id" element={<WatchPage />} />
