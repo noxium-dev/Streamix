@@ -1,12 +1,12 @@
 "use client";
 
 import React, { Suspense, useState, useEffect } from "react";
-import { Spinner } from "@heroui/spinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { Chip, Button, Divider, Tooltip, addToast } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { streamixApi, StreamixVideo, PublishedVideo } from "@/api/streamix";
+import { streamixApi, StreamixVideo, PublishedVideo, Artist, Genre } from "@/api/streamix";
 import { getStreamixImageUrl } from "@/utils/movies";
 
 const VideoPlayer = React.lazy(() => import("@/components/sections/Video/Player/Player"));
@@ -15,6 +15,8 @@ const VideoDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [localOverride, setLocalOverride] = useState<PublishedVideo | null>(null);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [artist, setArtist] = useState<Artist | null>(null);
+  const [genre, setGenre] = useState<Genre | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -58,6 +60,26 @@ const VideoDetailPage = () => {
           ...video,
           isFeatured: Boolean(video.isFeatured)
         });
+        
+        // Load artist if artistId exists
+        if (video.artistId) {
+          try {
+            const artistData = await streamixApi.getArtistById(video.artistId);
+            setArtist(artistData);
+          } catch (error) {
+            console.error("Failed to load artist", error);
+          }
+        }
+        
+        // Load genre if genreId exists
+        if (video.genreId) {
+          try {
+            const genreData = await streamixApi.getGenreById(video.genreId);
+            setGenre(genreData);
+          } catch (error) {
+            console.error("Failed to load genre", error);
+          }
+        }
       }
     } catch (error) {
       console.error("Failed to load published video", error);
@@ -77,7 +99,7 @@ const VideoDetailPage = () => {
   if (isPending) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <Spinner size="lg" color="primary" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -92,7 +114,7 @@ const VideoDetailPage = () => {
   }
 
   // Merge API data with local overrides if they exist
-  const video = localOverride 
+  const video = localOverride
     ? { ...apiVideo, ...localOverride, isFeatured: localOverride.isFeatured, like: localOverride.like || 0 } as PublishedVideo
     : apiVideo as unknown as PublishedVideo;
 
@@ -129,7 +151,7 @@ const VideoDetailPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 min-h-screen bg-background text-white">
-      <Suspense fallback={<Spinner size="lg" className="absolute-center" variant="simple" />}>
+      <Suspense fallback={<LoadingSpinner size="lg" className="absolute-center" />}>
         <div className="flex flex-col gap-6">
           {/* Video Player Section */}
           <div className="w-full overflow-hidden rounded-xl shadow-xl border-1 border-white/5 bg-black">
@@ -195,7 +217,26 @@ const VideoDetailPage = () => {
 
             <Divider className="opacity-10" />
 
-            {/* Combined Description & Tags Section */}
+            {/* Artist Info - YouTube Style (Above Description) */}
+            {artist && (
+              <div className="flex items-center gap-3 py-2">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border-2 border-primary/20">
+                  {artist.avatar ? (
+                    <img src={artist.avatar} alt={artist.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <Icon icon="lucide:user" className="text-primary/40" width={20} />
+                  )}
+                </div>
+                <div>
+                  <p className="text-sm font-bold">{artist.name}</p>
+                  {genre && (
+                    <p className="text-xs text-default-400">{genre.name}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Description Section */}
             <div className="rounded-2xl bg-secondary-background/50 p-6 border-1 border-divider flex flex-col gap-4">
               <h3 className="text-xl font-bold">Description</h3>
 
@@ -208,7 +249,7 @@ const VideoDetailPage = () => {
               )}
 
               {tags.length > 0 && (
-                <div className="flex flex-col gap-2 pt-5 border-t border-divider/50">
+                <div className="flex flex-col gap-2 pt-4 border-t border-divider/50">
                   <h4 className="text-[10px] font-bold text-default-400 uppercase tracking-widest">Tags</h4>
                   <div className="flex flex-wrap gap-2">
                     {tags.map((tag) => (

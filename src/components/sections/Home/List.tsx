@@ -2,7 +2,7 @@
 
 import ContentTypeSelection from "@/components/ui/other/ContentTypeSelection";
 import { siteConfig } from "@/config/site";
-import { Spinner } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import React, { Suspense, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import VideoHomeList from "../Video/HomeList";
@@ -32,7 +32,7 @@ const HomePageList: React.FC = () => {
       <div className="flex flex-col gap-8">
         <Suspense
           fallback={
-            <Spinner
+            <LoadingSpinner
               size="lg"
               className="mt-20 self-center"
               color="primary"

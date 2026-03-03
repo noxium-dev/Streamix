@@ -7,19 +7,19 @@ import { Icon } from "@iconify/react";
 const FAQS = [
   {
     title: "What is Streamix and how does it work?",
-    icon: "solar:info-circle-bold-duotone",
+    icon: "lucide:info",
     description:
       "Streamix is a modern streaming platform designed to provide easy access to a vast library of videos. We don't host any files locally; instead, we provide a seamless interface to stream content directly from various high-quality third-party storage providers.",
   },
   {
     title: "Where are the videos hosted?",
-    icon: "solar:globus-bold-duotone",
+    icon: "lucide:globe",
     description:
       "All videos are hosted on specialized third-party streaming services such as Upnshare, MegaUp.cc, and other reliable content delivery networks. This ensures fast buffering and multiple server options for the best viewing experience.",
   },
   {
     title: "What are the key features of Streamix?",
-    icon: "solar:star-bold-duotone",
+    icon: "lucide:star",
     description: (
       <ul className="list-disc ml-5 space-y-2">
         <li><span className="font-bold">Favourites System:</span> Save your favorite videos to your personal list for quick access anytime.</li>
@@ -32,19 +32,19 @@ const FAQS = [
   },
   {
     title: "Are there any costs or subscriptions?",
-    icon: "solar:dollar-minimalistic-bold-duotone",
+    icon: "lucide:dollar-sign",
     description:
       "Streamix is built to be accessible. While our platform is free to use for browsing and organizing your watch history, the third-party hosting services we link to may have their own policies regarding access and downloads.",
   },
   {
     title: "How do I add videos to my Favourites?",
-    icon: "solar:heart-bold-duotone",
+    icon: "lucide:heart",
     description:
       "Simply navigate to any video page and click the 'Favourite' heart button. Your choice is instantly saved to your browser's local storage, meaning your list stays with you on that device without needing an account.",
   },
   {
     title: "What should I do if a link is broken?",
-    icon: "solar:shield-warning-bold-duotone",
+    icon: "lucide:shield-alert",
     description:
       "Since we rely on external hosting, links can occasionally go down. We recommend checking the different server options provided in the player or returning later as our system frequently updates to fetch working mirrors.",
   },
@@ -54,8 +54,8 @@ const FAQ = () => {
   const { mobile } = useBreakpoints();
 
   return (
-    <Accordion 
-      variant="splitted" 
+    <Accordion
+      variant="splitted"
       isCompact={mobile}
       className="px-0"
       itemClasses={{
@@ -66,9 +66,9 @@ const FAQ = () => {
       }}
     >
       {FAQS.map(({ title, icon, description }) => (
-        <AccordionItem 
-          key={title} 
-          aria-label={title} 
+        <AccordionItem
+          key={title}
+          aria-label={title}
           title={title}
           startContent={
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">

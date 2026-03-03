@@ -52,12 +52,12 @@ export const onRequest = async (context: any) => {
 
       if (request.method === "POST") {
         const body = await request.json();
-        const { id, name, poster, resolution, duration, play, like, isFeatured, description, tags } = body;
+        const { id, name, poster, resolution, duration, play, like, isFeatured, description, tags, genreId, artistId } = body;
         
         await db.prepare(`
-          INSERT INTO videos (id, name, poster, resolution, duration, play, like, isFeatured, description, tags)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).bind(id, name, poster, resolution, duration, play || 0, like || 0, isFeatured ? 1 : 0, description || "", tags || "")
+          INSERT INTO videos (id, name, poster, resolution, duration, play, like, isFeatured, description, tags, genreId, artistId)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).bind(id, name, poster, resolution, duration, play || 0, like || 0, isFeatured ? 1 : 0, description || "", tags || "", genreId || null, artistId || null)
           .run();
 
         return new Response(JSON.stringify({ success: true, message: "Video published" }), { headers });
@@ -80,14 +80,14 @@ export const onRequest = async (context: any) => {
       // PUT /api/videos/:id - Update video
       if (request.method === "PUT") {
         const body = await request.json();
-        const { name, poster, resolution, duration, play, like, isFeatured, description, tags } = body;
+        const { name, poster, resolution, duration, play, like, isFeatured, description, tags, genreId, artistId } = body;
         
         await db.prepare(`
           UPDATE videos 
           SET name = ?, poster = ?, resolution = ?, duration = ?, play = ?, like = ?, 
-              isFeatured = ?, description = ?, tags = ?, updatedAt = datetime('now')
+              isFeatured = ?, description = ?, tags = ?, genreId = ?, artistId = ?, updatedAt = datetime('now')
           WHERE id = ?
-        `).bind(name, poster, resolution, duration, play || 0, like || 0, isFeatured ? 1 : 0, description || "", tags || "", videoId)
+        `).bind(name, poster, resolution, duration, play || 0, like || 0, isFeatured ? 1 : 0, description || "", tags || "", genreId || null, artistId || null, videoId)
           .run();
 
         return new Response(JSON.stringify({ success: true, message: "Video updated" }), { headers });

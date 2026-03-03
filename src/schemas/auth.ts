@@ -1,60 +1,53 @@
 import * as z from "zod";
 
-const AuthFormSchema = z.object({
+// Login schema - simple email + password
+const LoginFormSchema = z.object({
+  email: z.email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+});
+
+// Register schema - full name, username, email, password + confirm
+const RegisterFormSchema = z.object({
+  fullName: z.string().min(2, "Full name must be at least 2 characters long"),
   username: z
     .string()
     .min(3, "Username must be at least 3 characters long")
     .max(25, "Username must not exceed 20 characters"),
   email: z.email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
-  loginPassword: z.string(),
   confirm: z.string().min(1, "Password confirmation is required"),
-  captchaToken: z.string().min(500, "Token too short").max(5000, "Token too long").optional(),
-});
-
-const RegisterFormSchema = AuthFormSchema.omit({ loginPassword: true }).refine(
-  (data) => data.password === data.confirm,
-  {
-    message: "Passwords do not match",
-    path: ["confirm"],
-  },
-);
-
-const LoginFormSchema = AuthFormSchema.pick({
-  email: true,
-  loginPassword: true,
-  captchaToken: true,
-});
-
-const ForgotPasswordFormSchema = AuthFormSchema.pick({ email: true, captchaToken: true });
-
-const ResetPasswordFormSchema = AuthFormSchema.pick({
-  password: true,
-  confirm: true,
-  captchaToken: true,
 }).refine((data) => data.password === data.confirm, {
   message: "Passwords do not match",
   path: ["confirm"],
 });
 
-type AuthFormInput = z.infer<typeof AuthFormSchema>;
-type RegisterFormInput = z.infer<typeof RegisterFormSchema>;
+const ForgotPasswordFormSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
+const ResetPasswordFormSchema = z.object({
+  password: z.string().min(8, "Password must be at least 8 characters long"),
+  confirm: z.string().min(1, "Password confirmation is required"),
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords do not match",
+  path: ["confirm"],
+});
+
 type LoginFormInput = z.infer<typeof LoginFormSchema>;
+type RegisterFormInput = z.infer<typeof RegisterFormSchema>;
 type ForgotPasswordFormInput = z.infer<typeof ForgotPasswordFormSchema>;
 type ResetPasswordFormInput = z.infer<typeof ResetPasswordFormSchema>;
 
 export {
-  AuthFormSchema,
-  RegisterFormSchema,
   LoginFormSchema,
+  RegisterFormSchema,
   ForgotPasswordFormSchema,
   ResetPasswordFormSchema,
 };
 
 export type {
-  AuthFormInput,
-  RegisterFormInput,
   LoginFormInput,
+  RegisterFormInput,
   ForgotPasswordFormInput,
   ResetPasswordFormInput,
 };

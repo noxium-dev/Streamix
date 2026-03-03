@@ -1,6 +1,17 @@
 const API_BASE = "/api/streamix-api";
 const VIDEOS_API_BASE = "/api/videos";
 const GENRES_API_BASE = "/api/genres";
+const ARTISTS_API_BASE = "/api/artists";
+
+export interface Artist {
+  id: string;
+  name: string;
+  bio: string;
+  avatar: string;
+  socialLinks: string; // JSON string
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Genre {
   id: string;
@@ -22,6 +33,8 @@ export interface PublishedVideo {
   isFeatured: boolean;
   description: string;
   tags: string;
+  genreId?: string;
+  artistId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -164,14 +177,14 @@ export const streamixApi = {
     const url = featured ? `${VIDEOS_API_BASE}?featured=true` : VIDEOS_API_BASE;
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to fetch published videos");
-    const result = await response.json();
+    const result = await response.json() as { data?: any[] };
     return result.data || [];
   },
 
   getPublishedVideoById: async (id: string) => {
     const response = await fetch(`${VIDEOS_API_BASE}/${id}`);
     if (!response.ok) throw new Error("Failed to fetch video");
-    const result = await response.json();
+    const result = await response.json() as { data?: any };
     return result.data;
   },
 
@@ -207,14 +220,14 @@ export const streamixApi = {
   getGenres: async () => {
     const response = await fetch(GENRES_API_BASE);
     if (!response.ok) throw new Error("Failed to fetch genres");
-    const result = await response.json();
+    const result = await response.json() as { data?: any[] };
     return result.data || [];
   },
 
   getGenreById: async (id: string) => {
     const response = await fetch(`${GENRES_API_BASE}/${id}`);
     if (!response.ok) throw new Error("Failed to fetch genre");
-    const result = await response.json();
+    const result = await response.json() as { data?: any };
     return result.data;
   },
 
@@ -243,6 +256,49 @@ export const streamixApi = {
       method: "DELETE",
     });
     if (!response.ok) throw new Error("Failed to delete genre");
+    return response.json();
+  },
+
+  // Artists API
+  getArtists: async () => {
+    const response = await fetch(ARTISTS_API_BASE);
+    if (!response.ok) throw new Error("Failed to fetch artists");
+    const result = await response.json() as { data?: any[] };
+    return result.data || [];
+  },
+
+  getArtistById: async (id: string) => {
+    const response = await fetch(`${ARTISTS_API_BASE}/${id}`);
+    if (!response.ok) throw new Error("Failed to fetch artist");
+    const result = await response.json() as { data?: any };
+    return result.data;
+  },
+
+  createArtist: async (artist: Omit<Artist, "createdAt" | "updatedAt">) => {
+    const response = await fetch(ARTISTS_API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(artist),
+    });
+    if (!response.ok) throw new Error("Failed to create artist");
+    return response.json();
+  },
+
+  updateArtist: async (id: string, artist: Partial<Artist>) => {
+    const response = await fetch(`${ARTISTS_API_BASE}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(artist),
+    });
+    if (!response.ok) throw new Error("Failed to update artist");
+    return response.json();
+  },
+
+  deleteArtist: async (id: string) => {
+    const response = await fetch(`${ARTISTS_API_BASE}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete artist");
     return response.json();
   },
 };

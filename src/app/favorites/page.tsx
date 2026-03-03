@@ -5,13 +5,21 @@ import SectionTitle from "@/components/ui/other/SectionTitle";
 import HorizontalVideoCard from "@/components/sections/Video/Cards/Horizontal";
 import { Icon } from "@iconify/react";
 import { Button } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 const FavoritesPage = () => {
   const [favorites, setFavorites] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const savedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    setFavorites(savedFavorites);
+    // Add a small delay to show loading animation
+    const timer = setTimeout(() => {
+      const savedFavorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+      setFavorites(savedFavorites);
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const clearAll = () => {
@@ -20,6 +28,14 @@ const FavoritesPage = () => {
       setFavorites([]);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 py-2 min-h-[70vh]">

@@ -1,26 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Input, 
-  Button, 
-  Card, 
-  CardHeader, 
-  CardBody, 
-  Divider, 
+import {
+  Input,
+  Button,
+  Card,
+  CardHeader,
+  CardBody,
+  Divider,
   Image,
   Textarea,
   Spacer,
   addToast,
   Switch,
   cn,
-  Spinner,
   Chip,
   Tabs,
   Tab,
-  Tooltip
+  Tooltip,
+  Select,
+  SelectItem
 } from "@heroui/react";
-import { streamixApi, StreamixVideoDetail, StreamixVideo, PublishedVideo, Genre } from "@/api/streamix";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { streamixApi, StreamixVideoDetail, StreamixVideo, PublishedVideo, Genre, Artist } from "@/api/streamix";
 import HorizontalVideoCard from "@/components/sections/Video/Cards/Horizontal";
 import { Icon } from "@iconify/react";
 import { getStreamixImageUrl } from "@/utils/movies";
@@ -36,6 +38,8 @@ interface AdminVideoData {
   isFeatured?: boolean;
   description?: string;
   tags?: string;
+  genreId?: string;
+  artistId?: string;
   createdAt?: string;
 }
 
@@ -56,10 +60,17 @@ export default function AdminPage() {
   const [genreData, setGenreData] = useState<Partial<Genre>>({ name: "", icon: "", description: "" });
   const [isEditingGenre, setIsEditingGenre] = useState(false);
 
+  // Artist states
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [isLoadingArtists, setIsLoadingArtists] = useState(false);
+  const [artistData, setArtistData] = useState<Partial<Artist>>({ name: "", bio: "", avatar: "", socialLinks: "{}" });
+  const [isEditingArtist, setIsEditingArtist] = useState(false);
+
   useEffect(() => {
     localStorage.removeItem("published_videos");
     loadPublishedVideos();
     loadGenres();
+    loadArtists();
   }, []);
 
   const loadGenres = async () => {
@@ -115,6 +126,59 @@ export default function AdminPage() {
     }
   };
 
+  const loadArtists = async () => {
+    setIsLoadingArtists(true);
+    try {
+      const data = await streamixApi.getArtists();
+      setArtists(data);
+    } catch (error) {
+      console.error("Failed to load artists", error);
+    } finally {
+      setIsLoadingArtists(false);
+    }
+  };
+
+  const handleArtistSubmit = async () => {
+    if (!artistData.name) {
+      addToast({ title: "Name is required", color: "danger" });
+      return;
+    }
+
+    try {
+      if (isEditingArtist && artistData.id) {
+        await streamixApi.updateArtist(artistData.id, artistData);
+        addToast({ title: "Artist updated", color: "success" });
+      } else {
+        const id = artistData.name.toLowerCase().replace(/\s+/g, '-') + '-' + Date.now();
+        await streamixApi.createArtist({ ...artistData, id } as Artist);
+        addToast({ title: "Artist created", color: "success" });
+      }
+      setArtistData({ name: "", bio: "", avatar: "", socialLinks: "{}" });
+      setIsEditingArtist(false);
+      loadArtists();
+    } catch (error) {
+      addToast({ title: "Operation failed", color: "danger" });
+    }
+  };
+
+  const handleEditArtist = (artist: Artist) => {
+    setArtistData(artist);
+    setIsEditingArtist(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteArtist = async (id: string) => {
+    if (confirm("Are you sure you want to delete this artist?")) {
+      try {
+        await streamixApi.deleteArtist(id);
+        addToast({ title: "Artist deleted", color: "success" });
+        loadArtists();
+      } catch (error) {
+        addToast({ title: "Delete failed", color: "danger" });
+      }
+    }
+  };
+
   const loadPublishedVideos = async () => {
     setIsLoadingVideos(true);
     try {
@@ -162,9 +226,9 @@ export default function AdminPage() {
     try {
       const id = extractId(url);
       const data = await streamixApi.getVideoById(id);
-      
-      setVideoData({ 
-        ...data, 
+
+      setVideoData({
+        ...data,
         isFeatured: false,
         description: "",
         tags: ""
@@ -181,7 +245,7 @@ export default function AdminPage() {
 
   const handleFetchThumbnail = async () => {
     if (!videoData?.id) return;
-    
+
     setIsFetchingThumb(true);
     try {
       const data = await streamixApi.getVideoById(videoData.id);
@@ -205,13 +269,13 @@ export default function AdminPage() {
   const handlePublish = async () => {
     if (!videoData) return;
 
-    const newVideo = { 
-      ...videoData, 
+    const newVideo = {
+      ...videoData,
       isFeatured,
       play: videoData.play || 0,
       like: videoData.like || 0
     };
-    
+
     try {
       if (isEditing) {
         await streamixApi.updatePublishedVideo(newVideo.id!, newVideo);
@@ -222,7 +286,7 @@ export default function AdminPage() {
         setPublishedVideos(prev => [{ ...newVideo, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as any, ...prev]);
         addToast({ title: "Video published successfully!", color: "success" });
       }
-      
+
       if (isEditing) {
         setIsEditing(false);
         setVideoData(null);
@@ -266,8 +330,8 @@ export default function AdminPage() {
         </p>
       </section>
 
-      <Tabs 
-        selectedKey={activeTab} 
+      <Tabs
+        selectedKey={activeTab}
         onSelectionChange={(key) => setActiveTab(key as string)}
         color="primary"
         variant="underlined"
@@ -278,8 +342,8 @@ export default function AdminPage() {
           tabContent: "group-data-[selected=true]:text-primary font-bold"
         }}
       >
-        <Tab 
-          key="videos" 
+        <Tab
+          key="videos"
           title={
             <div className="flex items-center gap-2">
               <Icon icon="lucide:video" width={20} />
@@ -306,16 +370,16 @@ export default function AdminPage() {
               <CardBody className="gap-6 py-6">
                 {!isEditing && (
                   <div className="flex gap-2">
-                    <Input 
+                    <Input
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
-                      placeholder="https://upnshare.com/v/..." 
+                      placeholder="https://upnshare.com/v/..."
                       variant="bordered"
                       className="flex-1"
                       startContent={<Icon icon="lucide:link" className="text-default-400" />}
                     />
-                    <Button 
-                      color="primary" 
+                    <Button
+                      color="primary"
                       onPress={handleFetch}
                       isLoading={isLoading}
                       className="font-bold"
@@ -334,9 +398,9 @@ export default function AdminPage() {
                         <div className="pointer-events-none grayscale-[0.2]">
                           <HorizontalVideoCard video={videoData as StreamixVideo} />
                         </div>
-                        <Button 
-                          variant="flat" 
-                          color="secondary" 
+                        <Button
+                          variant="flat"
+                          color="secondary"
                           className="w-full font-semibold"
                           onPress={handleFetchThumbnail}
                           isLoading={isFetchingThumb}
@@ -347,52 +411,88 @@ export default function AdminPage() {
                         <p className="text-[10px] text-default-400 text-center italic">Tooltips disabled in preview mode</p>
                       </div>
                     </div>
-                    
+
                     <div className="md:col-span-8 flex flex-col gap-5">
                       <p className="text-sm font-semibold text-default-600 uppercase tracking-wider">Configuration</p>
-                      <Input 
+                      <Input
                         label="Title"
                         value={videoData.name}
-                        onChange={(e) => setVideoData({...videoData, name: e.target.value})}
+                        onChange={(e) => setVideoData({ ...videoData, name: e.target.value })}
                         variant="flat"
                       />
-                      
-                      <Input 
+
+                      <Input
                         label="Thumbnail URL (Auto-fetched)"
                         value={videoData.poster}
-                        onChange={(e) => setVideoData({...videoData, poster: e.target.value})}
+                        onChange={(e) => setVideoData({ ...videoData, poster: e.target.value })}
                         variant="flat"
                       />
-                      
-                      <Textarea 
+
+                      <Textarea
                         label="Description"
                         placeholder="Enter video description..."
                         value={videoData.description}
-                        onChange={(e) => setVideoData({...videoData, description: e.target.value})}
+                        onChange={(e) => setVideoData({ ...videoData, description: e.target.value })}
                         variant="flat"
                         minRows={3}
                       />
 
-                      <Input 
+                      <Input
                         label="Tags (Comma separated)"
                         placeholder="action, drama, sci-fi"
                         value={videoData.tags}
-                        onChange={(e) => setVideoData({...videoData, tags: e.target.value})}
+                        onChange={(e) => setVideoData({ ...videoData, tags: e.target.value })}
                         variant="flat"
                       />
 
                       <div className="grid grid-cols-2 gap-4">
-                        <Input 
+                        <Select
+                          label="Genre"
+                          placeholder="Select a genre"
+                          selectedKeys={videoData.genreId ? [videoData.genreId] : []}
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0] as string;
+                            setVideoData({ ...videoData, genreId: selected || undefined });
+                          }}
+                          variant="flat"
+                        >
+                          {genres.map((genre) => (
+                            <SelectItem key={genre.id}>
+                              {genre.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+
+                        <Select
+                          label="Artist"
+                          placeholder="Select an artist"
+                          selectedKeys={videoData.artistId ? [videoData.artistId] : []}
+                          onSelectionChange={(keys) => {
+                            const selected = Array.from(keys)[0] as string;
+                            setVideoData({ ...videoData, artistId: selected || undefined });
+                          }}
+                          variant="flat"
+                        >
+                          {artists.map((artist) => (
+                            <SelectItem key={artist.id}>
+                              {artist.name}
+                            </SelectItem>
+                          ))}
+                        </Select>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
                           label="Resolution"
                           value={videoData.resolution}
-                          onChange={(e) => setVideoData({...videoData, resolution: e.target.value})}
+                          onChange={(e) => setVideoData({ ...videoData, resolution: e.target.value })}
                           variant="flat"
                         />
-                        <Input 
+                        <Input
                           label="Duration (s)"
                           type="number"
                           value={String(videoData.duration)}
-                          onChange={(e) => setVideoData({...videoData, duration: Number(e.target.value)})}
+                          onChange={(e) => setVideoData({ ...videoData, duration: Number(e.target.value) })}
                           variant="flat"
                         />
                       </div>
@@ -402,15 +502,15 @@ export default function AdminPage() {
                           <p className="text-sm font-bold">Featured Content</p>
                           <p className="text-xs text-default-500">Display this video in the featured carousel.</p>
                         </div>
-                        <Switch 
-                          isSelected={isFeatured} 
+                        <Switch
+                          isSelected={isFeatured}
                           onValueChange={setIsFeatured}
                           color="primary"
                         />
                       </div>
 
                       <div className="flex gap-2 mt-2">
-                        <Button 
+                        <Button
                           color={isEditing ? "secondary" : "primary"}
                           size="lg"
                           className="flex-1 font-bold shadow-lg"
@@ -420,9 +520,9 @@ export default function AdminPage() {
                           {isEditing ? "Update Content" : "Publish Content"}
                         </Button>
                         {isEditing && (
-                          <Button 
-                            size="lg" 
-                            variant="flat" 
+                          <Button
+                            size="lg"
+                            variant="flat"
                             onPress={() => {
                               setIsEditing(false);
                               setVideoData(null);
@@ -446,19 +546,19 @@ export default function AdminPage() {
                   <p className="text-sm text-default-500">Currently live on the main UI</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button 
-                    size="sm" 
-                    color="primary" 
-                    variant="flat" 
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="flat"
                     startContent={<Icon icon="lucide:refresh-cw" />}
                     onPress={loadPublishedVideos}
                   >
                     Refresh
                   </Button>
-                  <Button 
-                    size="sm" 
-                    color="secondary" 
-                    variant="flat" 
+                  <Button
+                    size="sm"
+                    color="secondary"
+                    variant="flat"
                     startContent={<Icon icon="lucide:download" />}
                     onPress={async () => {
                       try {
@@ -500,10 +600,10 @@ export default function AdminPage() {
                           }
                         }
                         setPublishedVideos([]);
-                        addToast({title: "Collection cleared", color: "warning"});
+                        addToast({ title: "Collection cleared", color: "warning" });
                       } catch (error) {
                         console.error("Failed to clear collection", error);
-                        addToast({title: "Failed to clear collection", color: "danger"});
+                        addToast({ title: "Failed to clear collection", color: "danger" });
                       }
                     }}>
                       Clear Collection
@@ -511,10 +611,10 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
-              
+
               {isLoadingVideos ? (
                 <div className="h-48 flex items-center justify-center">
-                  <Spinner size="lg" color="primary" />
+                  <LoadingSpinner size="lg" />
                 </div>
               ) : publishedVideos.length === 0 ? (
                 <div className="h-48 flex flex-col items-center justify-center border-2 border-dashed border-divider rounded-2xl text-default-400 bg-default-50/30">
@@ -535,19 +635,19 @@ export default function AdminPage() {
                           )}
                         </div>
                         <div className="flex gap-1">
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            color="secondary" 
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            color="secondary"
                             variant="light"
                             onPress={() => handleEdit(video)}
                           >
                             <Icon icon="lucide:edit" width={18} />
                           </Button>
-                          <Button 
-                            isIconOnly 
-                            size="sm" 
-                            color="danger" 
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            color="danger"
                             variant="light"
                             onPress={() => video.id && handleRemove(video.id)}
                           >
@@ -562,8 +662,8 @@ export default function AdminPage() {
             </section>
           </div>
         </Tab>
-        <Tab 
-          key="genres" 
+        <Tab
+          key="genres"
           title={
             <div className="flex items-center gap-2">
               <Icon icon="lucide:layers" width={20} />
@@ -583,29 +683,29 @@ export default function AdminPage() {
               <Divider />
               <CardBody className="gap-5 py-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Input 
+                  <Input
                     label="Genre Name"
                     placeholder="e.g. Action, Horror"
                     value={genreData.name}
-                    onChange={(e) => setGenreData({...genreData, name: e.target.value})}
+                    onChange={(e) => setGenreData({ ...genreData, name: e.target.value })}
                   />
-                  <Input 
+                  <Input
                     label="Icon URL"
                     placeholder="https://icon-url.com/img.png"
                     value={genreData.icon}
-                    onChange={(e) => setGenreData({...genreData, icon: e.target.value})}
+                    onChange={(e) => setGenreData({ ...genreData, icon: e.target.value })}
                   />
                 </div>
-                <Textarea 
+                <Textarea
                   label="Description"
                   placeholder="Tell something about this genre..."
                   value={genreData.description}
-                  onChange={(e) => setGenreData({...genreData, description: e.target.value})}
+                  onChange={(e) => setGenreData({ ...genreData, description: e.target.value })}
                   minRows={2}
                 />
                 <div className="flex gap-2">
-                  <Button 
-                    color="primary" 
+                  <Button
+                    color="primary"
                     className="flex-1 font-bold"
                     onPress={handleGenreSubmit}
                   >
@@ -633,7 +733,7 @@ export default function AdminPage() {
 
               {isLoadingGenres ? (
                 <div className="h-48 flex items-center justify-center">
-                  <Spinner size="lg" color="primary" />
+                  <LoadingSpinner size="lg" />
                 </div>
               ) : genres.length === 0 ? (
                 <div className="h-32 flex items-center justify-center border-2 border-dashed border-divider rounded-2xl text-default-400">
@@ -664,7 +764,7 @@ export default function AdminPage() {
                             </div>
                           </div>
                         </div>
-                        <Tooltip 
+                        <Tooltip
                           content={genre.description || "No description provided."}
                           placement="bottom"
                           showArrow
@@ -678,6 +778,128 @@ export default function AdminPage() {
                             {genre.description || "No description provided."}
                           </p>
                         </Tooltip>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </Tab>
+        <Tab
+          key="artists"
+          title={
+            <div className="flex items-center gap-2">
+              <Icon icon="lucide:user-circle" width={20} />
+              <span>Artists</span>
+            </div>
+          }
+        >
+          <div className="flex flex-col gap-8 mt-4">
+            <Card className={cn(
+              "bg-secondary-background/50 backdrop-blur-md border-1",
+              isEditingArtist ? "border-secondary shadow-lg shadow-secondary/10" : "border-divider"
+            )}>
+              <CardHeader className="flex flex-col items-start gap-1 pb-2">
+                <p className="text-lg font-bold">{isEditingArtist ? "Edit Artist" : "Add New Artist"}</p>
+                <p className="text-small text-default-500">Create artist profiles to display on video pages</p>
+              </CardHeader>
+              <Divider />
+              <CardBody className="gap-5 py-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Artist Name"
+                    placeholder="e.g. John Doe"
+                    value={artistData.name}
+                    onChange={(e) => setArtistData({ ...artistData, name: e.target.value })}
+                  />
+                  <Input
+                    label="Avatar URL"
+                    placeholder="https://avatar-url.com/img.png"
+                    value={artistData.avatar}
+                    onChange={(e) => setArtistData({ ...artistData, avatar: e.target.value })}
+                  />
+                </div>
+                <Textarea
+                  label="Bio"
+                  placeholder="Tell something about this artist..."
+                  value={artistData.bio}
+                  onChange={(e) => setArtistData({ ...artistData, bio: e.target.value })}
+                  minRows={3}
+                />
+                <Textarea
+                  label="Social Links (JSON)"
+                  placeholder='{"twitter": "https://twitter.com/...", "instagram": "https://instagram.com/..."}'
+                  value={artistData.socialLinks}
+                  onChange={(e) => setArtistData({ ...artistData, socialLinks: e.target.value })}
+                  minRows={2}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    color="primary"
+                    className="flex-1 font-bold"
+                    onPress={handleArtistSubmit}
+                  >
+                    {isEditingArtist ? "Update Artist" : "Create Artist"}
+                  </Button>
+                  {isEditingArtist && (
+                    <Button variant="flat" onPress={() => {
+                      setIsEditingArtist(false);
+                      setArtistData({ name: "", bio: "", avatar: "", socialLinks: "{}" });
+                    }}>
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+
+            <section className="flex flex-col gap-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Artist Profiles</h2>
+                <Button size="sm" variant="flat" onPress={loadArtists} startContent={<Icon icon="lucide:refresh-cw" />}>
+                  Refresh
+                </Button>
+              </div>
+
+              {isLoadingArtists ? (
+                <div className="h-48 flex items-center justify-center">
+                  <LoadingSpinner size="lg" />
+                </div>
+              ) : artists.length === 0 ? (
+                <div className="h-32 flex items-center justify-center border-2 border-dashed border-divider rounded-2xl text-default-400">
+                  No artists created yet
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                  {artists.map((artist) => (
+                    <Card key={artist.id} className="bg-secondary-background/40 hover:bg-secondary-background/60 transition-colors border-1 border-divider/50">
+                      <CardBody className="p-4 flex flex-col gap-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border-2 border-primary/20">
+                            {artist.avatar ? (
+                              <Image src={artist.avatar} alt={artist.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Icon icon="lucide:user" className="text-primary/40" width={24} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between gap-2">
+                              <h3 className="font-bold text-base truncate">{artist.name}</h3>
+                              <div className="flex gap-1">
+                                <Button isIconOnly size="sm" variant="light" color="secondary" className="h-7 w-7 min-w-7" onPress={() => handleEditArtist(artist)}>
+                                  <Icon icon="lucide:edit-2" width={14} />
+                                </Button>
+                                <Button isIconOnly size="sm" variant="light" color="danger" className="h-7 w-7 min-w-7" onPress={() => handleDeleteArtist(artist.id)}>
+                                  <Icon icon="lucide:trash" width={14} />
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-default-500 line-clamp-2 mt-1">
+                              {artist.bio || "No bio provided."}
+                            </p>
+                          </div>
+                        </div>
                       </CardBody>
                     </Card>
                   ))}

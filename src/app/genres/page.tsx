@@ -3,15 +3,15 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { streamixApi, Genre } from "@/api/streamix";
-import { Spinner, Card, CardBody, Image, Tooltip } from "@heroui/react";
+import { Card, CardBody, Image, Tooltip } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import SectionTitle from "@/components/ui/other/SectionTitle";
 import { Icon } from "@iconify/react";
 
 const GenresPage = () => {
   const { data: genres, isPending } = useQuery({
     queryFn: () => streamixApi.getGenres(),
-    queryKey: ["genres"],
-  });
+    queryKey: ["genres"] });
 
   return (
     <div className="flex flex-col gap-6 py-2 min-h-[70vh]">
@@ -21,7 +21,7 @@ const GenresPage = () => {
 
       {isPending ? (
         <div className="flex min-h-[40vh] items-center justify-center">
-          <Spinner size="lg" color="primary" />
+          <LoadingSpinner size="lg" />
         </div>
       ) : genres?.length === 0 ? (
         <div className="flex min-h-[30vh] flex-col items-center justify-center border-2 border-dashed border-divider rounded-3xl text-default-400">
@@ -64,8 +64,7 @@ const GenresPage = () => {
                   showArrow
                   classNames={{
                     base: "before:bg-default-200",
-                    content: "py-2 px-3 shadow-xl text-default-900 bg-default-100 max-w-[250px] text-xs font-medium",
-                  }}
+                    content: "py-2 px-3 shadow-xl text-default-900 bg-default-100 max-w-[250px] text-xs font-medium" }}
                   delay={500}
                 >
                   <p className="text-[0.95rem] text-default-500 line-clamp-2 leading-snug font-medium px-0.5 cursor-help">

@@ -1,10 +1,9 @@
 "use client";
 
-import { Switch } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { IoIosSunny } from "react-icons/io";
-import { IoMoon } from "react-icons/io5";
+import { Icon } from "@iconify/react";
+import { Switch } from "@heroui/react";
 
 const ThemeSwitchDropdown = () => {
   const { theme, setTheme } = useTheme();
@@ -14,31 +13,26 @@ const ThemeSwitchDropdown = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
 
-  const isDark = theme === "dark" || theme === "system";
+  const isDark = theme === "dark";
+
+  const toggle = () => setTheme(isDark ? "light" : "dark");
 
   return (
-    <div className="flex items-center">
-      <Switch
-        defaultSelected={isDark}
-        size="lg"
-        color="primary"
-        thumbIcon={({ isSelected, className }) =>
-          isSelected ? (
-            <IoMoon className={className} />
-          ) : (
-            <IoIosSunny className={className} />
-          )
-        }
-        onChange={(e) => {
-          setTheme(e.target.checked ? "dark" : "light");
-        }}
-        aria-label="Toggle theme"
-      />
-    </div>
+    <Switch
+      isSelected={isDark}
+      onValueChange={toggle}
+      size="md"
+      color="primary"
+      aria-label="Toggle theme"
+      startContent={<Icon icon="lucide:sun" className="text-amber-400" />}
+      endContent={<Icon icon="lucide:moon" className="text-indigo-400" />}
+      classNames={{
+        wrapper: "group-data-[selected=true]:bg-primary",
+        thumb: "group-data-[selected=true]:ml-6"
+      }}
+    />
   );
 };
 

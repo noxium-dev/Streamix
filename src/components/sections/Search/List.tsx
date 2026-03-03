@@ -7,7 +7,7 @@ import StreamixVideoCard from "@/components/sections/Video/Cards/Poster";
 import useDiscoverFilters from "@/hooks/useDiscoverFilters";
 import { ContentType } from "@/types";
 import { isEmpty } from "@/utils/helpers";
-import { Spinner } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useInViewport } from "@mantine/hooks";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
@@ -42,8 +42,8 @@ const SearchList = () => {
         fetchData({ page, type: content as ContentType, query: submittedSearchQuery }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) =>
-        lastPage.metadata.currentPage < lastPage.metadata.maxPage 
-          ? lastPage.metadata.currentPage + 1 
+        lastPage.metadata.currentPage < lastPage.metadata.maxPage
+          ? lastPage.metadata.currentPage + 1
           : undefined,
     });
 
@@ -102,21 +102,17 @@ const SearchList = () => {
         <>
           <div className="relative flex flex-col items-center gap-8">
             {isPending && (
-              <Spinner
+              <LoadingSpinner
                 size="lg"
                 className="absolute-center mt-56"
-                color="primary"
-                variant="simple"
               />
             )}
             {!isPending && renderSearchResults()}
           </div>
           <div ref={ref} className="flex h-24 items-center justify-center">
             {isFetchingNextPage && (
-              <Spinner
-                color="primary"
+              <LoadingSpinner
                 size="lg"
-                variant="wave"
               />
             )}
             {!isEmpty(data?.pages[0]?.data) && !hasNextPage && !isPending && (

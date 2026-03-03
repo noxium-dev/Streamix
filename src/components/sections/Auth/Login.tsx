@@ -1,25 +1,21 @@
 import { signIn } from "@/actions/auth";
 import PasswordInput from "@/components/ui/input/PasswordInput";
 import { LoginFormSchema } from "@/schemas/auth";
-import { isEmpty } from "@/utils/helpers";
-import { Google, LockPassword, Mail } from "@/utils/icons";
-import { addToast, Button, Divider, Input, Link } from "@heroui/react";
+import { LockPassword, Mail } from "@/utils/icons";
+import { addToast, Button, Input, Link } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Turnstile } from "@marsidev/react-turnstile";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { AuthFormProps } from "./Forms";
-import { env } from "@/utils/env";
 import { useNavigate } from "react-router-dom";
-import GoogleLoginButton from "@/components/ui/button/GoogleLoginButton";
+import { queryClient } from "@/app/providers";
+import { Icon } from "@iconify/react";
 
 const AuthLoginForm: React.FC<AuthFormProps> = ({ setForm }) => {
   const navigate = useNavigate();
-  const [isVerifying, setIsVerifying] = useState(false);
 
   const {
     register,
-    setValue,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -27,51 +23,31 @@ const AuthLoginForm: React.FC<AuthFormProps> = ({ setForm }) => {
     mode: "onChange",
     defaultValues: {
       email: "",
-      loginPassword: "",
+      password: "",
     },
   });
 
   const onSubmit = handleSubmit(async (data) => {
-    if (isEmpty(data.captchaToken)) {
-      setIsVerifying(true);
-      return;
-    }
-
     const { success, message } = await signIn(data);
-
     addToast({
       title: message,
       color: success ? "success" : "danger",
     });
-
-    if (!success) {
-      setValue("captchaToken", undefined);
-      setIsVerifying(false);
-      return;
+    if (success) {
+      queryClient.invalidateQueries({ queryKey: ["supabase-user"] });
+      return navigate("/");
     }
-
-    return navigate("/");
   });
-
-  const onCaptchaSuccess = useCallback(
-    (token: string) => {
-      setValue("captchaToken", token);
-      setIsVerifying(false);
-      onSubmit();
-    },
-    [setValue, setIsVerifying, onSubmit],
-  );
 
   const getButtonText = useCallback(() => {
     if (isSubmitting) return "Signing In...";
-    if (isVerifying) return "Verifying...";
     return "Sign In";
-  }, [isSubmitting, isVerifying]);
+  }, [isSubmitting]);
 
   return (
     <div className="flex flex-col gap-5">
       <form className="flex flex-col gap-3" onSubmit={onSubmit}>
-        <p className="text-small text-foreground-500 mb-4 text-center">
+        <p className="text-small text-foreground-500 mb-2 text-center">
           Sign in to continue your streaming journey
         </p>
         <Input
@@ -84,62 +60,50 @@ const AuthLoginForm: React.FC<AuthFormProps> = ({ setForm }) => {
           type="email"
           variant="underlined"
           startContent={<Mail className="text-xl" />}
-          isDisabled={isSubmitting || isVerifying}
+          isDisabled={isSubmitting}
         />
         <PasswordInput
-          {...register("loginPassword")}
-          isInvalid={!!errors.loginPassword?.message}
-          errorMessage={errors.loginPassword?.message}
+          {...register("password")}
+          isInvalid={!!errors.password?.message}
+          errorMessage={errors.password?.message}
           isRequired
           variant="underlined"
           label="Password"
           placeholder="Enter your password"
           startContent={<LockPassword className="text-xl" />}
-          isDisabled={isSubmitting || isVerifying}
+          isDisabled={isSubmitting}
         />
-        <div className="flex w-full items-center justify-end px-1 py-2">
+        <div className="flex justify-end -mt-1">
           <Link
             size="sm"
-            className="text-foreground cursor-pointer"
+            className="cursor-pointer text-xs"
             onClick={() => setForm("forgot")}
-            isDisabled={isSubmitting || isVerifying}
+            isDisabled={isSubmitting}
           >
             Forgot password?
           </Link>
         </div>
-        {isVerifying && (
-          <Turnstile
-            className="flex h-fit w-full items-center justify-center"
-            siteKey={env.NEXT_PUBLIC_CAPTCHA_SITE_KEY}
-            onSuccess={onCaptchaSuccess}
-          />
-        )}
         <Button
-          className="mt-4"
+          className="mt-2"
           color="primary"
           type="submit"
           variant="shadow"
-          isLoading={isSubmitting || isVerifying}
+          isLoading={isSubmitting}
+          startContent={!isSubmitting && <Icon icon="lucide:log-in" className="text-lg" />}
         >
           {getButtonText()}
         </Button>
       </form>
-      <div className="flex items-center gap-4">
-        <Divider className="flex-1" />
-        <p className="text-tiny text-default-500 shrink-0">OR</p>
-        <Divider className="flex-1" />
-      </div>
-      <GoogleLoginButton isDisabled={isSubmitting || isVerifying} />
       <p className="text-small text-center">
-        Don't have an account?
+        Don&apos;t have an account?{" "}
         <Link
           isBlock
           size="sm"
           className="cursor-pointer"
           onClick={() => setForm("register")}
-          isDisabled={isSubmitting || isVerifying}
+          isDisabled={isSubmitting}
         >
-          Sign Up
+          Create Account
         </Link>
       </p>
     </div>

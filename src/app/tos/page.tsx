@@ -1,19 +1,32 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import SectionTitle from "@/components/ui/other/SectionTitle";
 import { Icon } from "@iconify/react";
 import { Card, CardBody } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 export default function TosPage() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Add a small delay to show loading animation
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
   const sections = [
     {
       title: "Acceptance of Terms",
-      icon: "solar:verified-check-bold-duotone",
+      icon: "lucide:file-check-2",
       content: "By accessing and using Streamix, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service. If you do not agree with any part of these terms, you are prohibited from using or accessing this site. The materials contained in this website are protected by applicable copyright and trademark law."
     },
     {
       title: "Use License",
-      icon: "solar:laptop-minimalistic-bold-duotone",
+      icon: "lucide:laptop",
       content: "Permission is granted to temporarily access the materials (information or software) on Streamix's website for personal, non-commercial transitory viewing only. This is the grant of a license, not a transfer of title, and under this license you may not:",
       list: [
         "Modify or copy the materials.",
@@ -25,33 +38,41 @@ export default function TosPage() {
     },
     {
       title: "Content Disclaimer",
-      icon: "solar:shield-warning-bold-duotone",
+      icon: "lucide:shield-alert",
       content: "The materials on Streamix's website are provided on an 'as is' basis. Streamix makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.",
       subContent: "Furthermore, Streamix does not warrant or make any representations concerning the accuracy, likely results, or reliability of the use of the materials on its website or otherwise relating to such materials or on any sites linked to this site."
     },
     {
       title: "Limitations of Liability",
-      icon: "solar:danger-bold-duotone",
+      icon: "lucide:alert-triangle",
       content: "In no event shall Streamix or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit, or due to business interruption) arising out of the use or inability to use the materials on Streamix's website, even if Streamix or a Streamix authorized representative has been notified orally or in writing of the possibility of such damage."
     },
     {
       title: "Links to External Sites",
-      icon: "solar:link-round-bold-duotone",
+      icon: "lucide:external-link",
       content: "Streamix has not reviewed all of the sites linked to its website and is not responsible for the contents of any such linked site. The inclusion of any link does not imply endorsement by Streamix of the site. Use of any such linked website is at the user's own risk."
     },
     {
       title: "Governing Law",
-      icon: "solar:globus-bold-duotone",
+      icon: "lucide:scale",
       content: "These terms and conditions are governed by and construed in accordance with the laws of your jurisdiction and you irrevocably submit to the exclusive jurisdiction of the courts in that State or location."
     }
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 py-6 min-h-[70vh] max-w-4xl mx-auto w-full px-4">
       <div className="flex flex-col gap-3">
         <SectionTitle>Terms of Service</SectionTitle>
         <div className="flex items-center gap-2 text-default-400 font-medium text-sm">
-          <Icon icon="solar:calendar-bold-duotone" width={16} />
+          <Icon icon="lucide:calendar" width={16} />
           <span>Last updated: March 3, 2026</span>
         </div>
       </div>
@@ -66,7 +87,7 @@ export default function TosPage() {
                 </div>
                 <h2 className="text-xl font-bold tracking-tight text-foreground uppercase">{section.title}</h2>
               </div>
-              
+
               {section.content && (
                 <p className="text-default-500 leading-relaxed font-medium">
                   {section.content}

@@ -4,7 +4,7 @@ import { streamixApi } from "@/api/streamix";
 import HorizontalVideoCard from "@/components/sections/Video/Cards/Horizontal";
 import BackToTopButton from "@/components/ui/button/BackToTopButton";
 import SectionTitle from "@/components/ui/other/SectionTitle";
-import { Spinner } from "@heroui/react";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@iconify/react";
 
@@ -18,7 +18,7 @@ const DiscoverList = () => {
     <div className="flex flex-col gap-6 py-2 min-h-[70vh]">
       {isPending ? (
         <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-          <Spinner size="lg" color="primary" />
+          <LoadingSpinner size="lg" color="primary" />
         </div>
       ) : (
         <>
