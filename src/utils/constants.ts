@@ -1,9 +1,9 @@
 // Environment variables
 const IS_BROWSER = typeof window !== "undefined";
 const IS_SERVER = !IS_BROWSER;
-const IS_PRODUCTION = process.env.NODE_ENV === "production";
-const IS_DEVELOPMENT = process.env.NODE_ENV === "development";
-const IS_TEST = process.env.NODE_ENV === "test";
+const IS_PRODUCTION = (import.meta as any).env?.PROD || false;
+const IS_DEVELOPMENT = (import.meta as any).env?.DEV || true;
+const IS_TEST = (import.meta as any).env?.MODE === "test";
 
 // Storage keys
 const DISCLAIMER_STORAGE_KEY = "disclaimer-agreed";

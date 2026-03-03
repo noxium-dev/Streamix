@@ -1,12 +1,10 @@
-import { createParser } from "nuqs";
-
-export const parseAsSet = createParser({
-  parse(queryValue) {
+export const parseAsSet = {
+  parse(queryValue: string) {
     return new Set(queryValue.split(",").filter((item) => item !== ""));
   },
-  serialize(value) {
+  serialize(value: Set<string>) {
     return Array.from(value)
       .filter((item) => item !== "")
       .join(",");
   },
-});
+};

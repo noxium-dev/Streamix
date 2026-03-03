@@ -2,10 +2,10 @@
 
 import NavbarMenuItems from "../other/NavbarMenuItems";
 import { siteConfig } from "@/config/site";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
 
 const Sidebar: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const pathName = usePathname();
+  const { pathname: pathName } = useLocation();
   const hrefs = siteConfig.navItems.map((item) => item.href);
   const shouldShowSidebar = hrefs.includes(pathName);
 

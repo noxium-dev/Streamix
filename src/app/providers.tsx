@@ -1,25 +1,23 @@
 "use client";
 
-import { PropsWithChildren, Suspense } from "react";
+import { PropsWithChildren } from "react";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AppProgressProvider as ProgressProvider } from "@bprogress/next";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { usePathname, useRouter } from "next/navigation";
+import { useLocation, useNavigate } from "react-router-dom";
 import useDiscoverFilters from "@/hooks/useDiscoverFilters";
 
 export const queryClient = new QueryClient();
 
 export default function Providers({ children }: PropsWithChildren) {
-  const { push } = useRouter();
-  const pathName = usePathname();
+  const navigate = useNavigate();
+  const { pathname: pathName } = useLocation();
   const { content } = useDiscoverFilters();
   const isVideo = pathName.includes("/watch/") || content === "movie";
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HeroUIProvider navigate={push}>
+      <HeroUIProvider navigate={navigate}>
         <ToastProvider
           placement="top-right"
           maxVisibleToasts={1}
@@ -35,14 +33,7 @@ export default function Providers({ children }: PropsWithChildren) {
           }}
         />
         <NextThemesProvider attribute="class" defaultTheme="dark" enableSystem>
-          <Suspense>
-            <ProgressProvider
-              options={{ showSpinner: false }}
-              color={`hsl(var(--heroui-${isVideo ? "primary" : "secondary"}))`}
-            >
-              {children}
-            </ProgressProvider>
-          </Suspense>
+          {children}
         </NextThemesProvider>
       </HeroUIProvider>
     </QueryClientProvider>

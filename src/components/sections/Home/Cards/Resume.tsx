@@ -6,7 +6,7 @@ import { cn } from "@/utils/helpers";
 import { PlayOutline } from "@/utils/icons";
 import { formatDuration, getImageUrl, timeAgo } from "@/utils/movies";
 import { Chip, Image, Progress } from "@heroui/react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useCallback } from "react";
 
 interface ResumeCardProps {
@@ -29,7 +29,7 @@ const ResumeCard: React.FC<ResumeCardProps> = ({ media }) => {
 
   return (
     <>
-      <Link href={getRedirectLink()}>
+      <Link to={getRedirectLink()}>
         <div
           className={cn(
             "group motion-preset-focus relative aspect-video overflow-hidden rounded-lg text-white",

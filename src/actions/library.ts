@@ -1,7 +1,4 @@
-"use server";
-
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
 
 // Types
 type ContentType = "movie" | "tv";
@@ -110,8 +107,7 @@ export async function addToWatchlist(item: WatchlistItem): Promise<ActionRespons
       };
     }
 
-    // Revalidate the watchlist page if you have one
-    revalidatePath("/library");
+    // Watchlist added successfully
 
     return {
       success: true,
@@ -179,8 +175,7 @@ export async function removeFromWatchlist(id: number, type: ContentType): Promis
       };
     }
 
-    // Revalidate the watchlist page
-    revalidatePath("/library");
+    // Watchlist updated successfully
 
     return {
       success: true,
@@ -238,8 +233,7 @@ export const removeAllWatchlist = async (type: ContentType): Promise<ActionRespo
       };
     }
 
-    // Revalidate the watchlist page
-    revalidatePath("/library");
+    // Watchlist updated successfully
 
     return {
       success: true,

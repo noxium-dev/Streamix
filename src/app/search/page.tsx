@@ -1,16 +1,10 @@
-import { siteConfig } from "@/config/site";
-import dynamic from "next/dynamic";
-import { Metadata, NextPage } from "next/types";
-import { Suspense } from "react";
-const SearchList = dynamic(() => import("@/components/sections/Search/List"));
+import React, { Suspense } from "react";
 
-export const metadata: Metadata = {
-  title: `Search Movies | ${siteConfig.name}`,
-};
+const SearchList = React.lazy(() => import("@/components/sections/Search/List"));
 
-const SearchPage: NextPage = () => {
+const SearchPage = () => {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]">Loading...</div>}>
       <SearchList />
     </Suspense>
   );

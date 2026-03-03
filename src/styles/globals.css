@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "./lightbox.css";
 
+/* Google Fonts Imports */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Saira:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&family=PT+Sans+Narrow:wght@400;700&display=swap');
+
+@theme {
+  --font-poppins: 'Poppins', sans-serif;
+  --font-saira: 'Saira', sans-serif;
+  --font-oswald: 'Oswald', sans-serif;
+  --font-pt-sans-narrow: 'PT Sans Narrow', sans-serif;
+}
+
 @plugin '../utils/hero.ts';
 @plugin "tailwindcss-motion";
 
@@ -94,5 +104,5 @@
 }
 
 @utility movie-grid {
-  @apply grid size-full max-w-6xl grid-cols-2 justify-center gap-2 sm:grid-cols-3 md:gap-4 lg:grid-cols-[repeat(auto-fit,minmax(200px,50px))];
+  @apply grid size-full max-w-6xl grid-cols-2 justify-center gap-2 sm:grid-cols-3 md:gap-4 lg:grid-cols-[repeat(auto-fill,minmax(200px,1fr))];
 }

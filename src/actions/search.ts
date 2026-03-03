@@ -1,5 +1,3 @@
-"use server";
-
 import { streamixApi } from "@/api/streamix";
 import { ActionResponse } from "@/types";
 

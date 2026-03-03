@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site";
-import { Link, Tab, Tabs, TabsProps } from "@heroui/react";
-import { usePathname } from "next/navigation";
+import { Tab, Tabs, TabsProps } from "@heroui/react";
+import { Link, useLocation } from "react-router-dom";
 
 interface NavbarMenuItemsProps extends TabsProps {
   withIcon?: boolean;
@@ -19,7 +19,7 @@ const NavbarMenuItems: React.FC<NavbarMenuItemsProps> = ({
   variant = "underlined",
   size = "lg",
 }) => {
-  const pathName = usePathname();
+  const { pathname: pathName } = useLocation();
 
   return (
     <Tabs
@@ -46,7 +46,15 @@ const NavbarMenuItems: React.FC<NavbarMenuItemsProps> = ({
         }
 
         return (
-          <Tab as={Link} href={item.href} key={item.href} className="text-start" title={title} />
+          <Tab 
+            key={item.href} 
+            className="text-start" 
+            title={
+              <Link to={item.href} className="w-full h-full flex items-center">
+                {title}
+              </Link>
+            } 
+          />
         );
       })}
     </Tabs>

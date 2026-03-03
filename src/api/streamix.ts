@@ -1,5 +1,30 @@
 const API_BASE = "/api/streamix-api";
-const STREAMIX_TOKEN = "f6335d071b5b4ed82bace91d";
+const VIDEOS_API_BASE = "/api/videos";
+const GENRES_API_BASE = "/api/genres";
+
+export interface Genre {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PublishedVideo {
+  id: string;
+  name: string;
+  poster: string;
+  resolution: string;
+  duration: number;
+  play: number;
+  like: number;
+  isFeatured: boolean;
+  description: string;
+  tags: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface StreamixVideo {
   id: string;
@@ -75,14 +100,19 @@ const fetchApi = async <T>(
   endpoint: string,
   params?: Record<string, string>
 ): Promise<T> => {
-  const url = new URL(`${API_BASE}${endpoint}`, window.location.origin);
+  const searchParams = new URLSearchParams();
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, value);
+      searchParams.append(key, value);
     });
   }
 
-  const response = await fetch(url.toString());
+  const queryString = searchParams.toString();
+  // Ensure endpoint starts with / and doesn't double up
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE}${cleanEndpoint}${queryString ? `?${queryString}` : ""}`;
+
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new Error(`API Error: ${response.statusText}`);
@@ -94,31 +124,31 @@ let cachedPlayer: StreamixDefaultPlayer | null = null;
 
 export const streamixApi = {
   getVideos: (page = 1, perPage = 20) =>
-    fetchApi<StreamixApiResponse<StreamixVideo[]>>("/api/v1/video/manage", {
+    fetchApi<StreamixApiResponse<StreamixVideo[]>>("/video/manage", {
       page: String(page),
       perPage: String(perPage),
     }),
 
   getVideoById: (id: string) =>
-    fetchApi<StreamixVideoDetail>(`/api/v1/video/manage/${id}`),
+    fetchApi<StreamixVideoDetail>(`/video/manage/${id}`),
 
   getPlayers: () =>
-    fetchApi<StreamixApiResponse<StreamixPlayer[]>>("/api/v1/video/player"),
+    fetchApi<StreamixApiResponse<StreamixPlayer[]>>("/video/player"),
 
   getDefaultPlayer: async (): Promise<StreamixDefaultPlayer> => {
     if (cachedPlayer) {
       return cachedPlayer;
     }
-    const player = await fetchApi<StreamixDefaultPlayer>("/api/v1/video/player/default");
+    const player = await fetchApi<StreamixDefaultPlayer>("/video/player/default");
     cachedPlayer = player;
     return player;
   },
 
   getPlayerDomains: () =>
-    fetchApi<string[]>("/api/v1/video/player/domain"),
+    fetchApi<string[]>("/video/player/domain"),
 
   searchVideos: (query: string, page = 1, perPage = 20) =>
-    fetchApi<StreamixApiResponse<StreamixVideo[]>>("/api/v1/video/manage", {
+    fetchApi<StreamixApiResponse<StreamixVideo[]>>("/video/manage", {
       page: String(page),
       perPage: String(perPage),
       search: query,
@@ -127,7 +157,92 @@ export const streamixApi = {
 
   getVideoEmbedUrl: async (videoId: string): Promise<string> => {
     const player = await streamixApi.getDefaultPlayer();
-    // Assuming player.domain returns streamix.upns.pro
     return `https://${player.domain}/#${videoId}`;
+  },
+
+  getPublishedVideos: async (featured?: boolean) => {
+    const url = featured ? `${VIDEOS_API_BASE}?featured=true` : VIDEOS_API_BASE;
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch published videos");
+    const result = await response.json();
+    return result.data || [];
+  },
+
+  getPublishedVideoById: async (id: string) => {
+    const response = await fetch(`${VIDEOS_API_BASE}/${id}`);
+    if (!response.ok) throw new Error("Failed to fetch video");
+    const result = await response.json();
+    return result.data;
+  },
+
+  publishVideo: async (video: Omit<PublishedVideo, "createdAt" | "updatedAt">) => {
+    const response = await fetch(VIDEOS_API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(video),
+    });
+    if (!response.ok) throw new Error("Failed to publish video");
+    return response.json();
+  },
+
+  updatePublishedVideo: async (id: string, video: Partial<PublishedVideo>) => {
+    const response = await fetch(`${VIDEOS_API_BASE}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(video),
+    });
+    if (!response.ok) throw new Error("Failed to update video");
+    return response.json();
+  },
+
+  deletePublishedVideo: async (id: string) => {
+    const response = await fetch(`${VIDEOS_API_BASE}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete video");
+    return response.json();
+  },
+
+  // Genres API
+  getGenres: async () => {
+    const response = await fetch(GENRES_API_BASE);
+    if (!response.ok) throw new Error("Failed to fetch genres");
+    const result = await response.json();
+    return result.data || [];
+  },
+
+  getGenreById: async (id: string) => {
+    const response = await fetch(`${GENRES_API_BASE}/${id}`);
+    if (!response.ok) throw new Error("Failed to fetch genre");
+    const result = await response.json();
+    return result.data;
+  },
+
+  createGenre: async (genre: Omit<Genre, "createdAt" | "updatedAt">) => {
+    const response = await fetch(GENRES_API_BASE, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(genre),
+    });
+    if (!response.ok) throw new Error("Failed to create genre");
+    return response.json();
+  },
+
+  updateGenre: async (id: string, genre: Partial<Genre>) => {
+    const response = await fetch(`${GENRES_API_BASE}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(genre),
+    });
+    if (!response.ok) throw new Error("Failed to update genre");
+    return response.json();
+  },
+
+  deleteGenre: async (id: string) => {
+    const response = await fetch(`${GENRES_API_BASE}/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete genre");
+    return response.json();
   },
 };

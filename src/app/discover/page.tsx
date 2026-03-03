@@ -1,16 +1,10 @@
-import { Metadata, NextPage } from "next/types";
-import { siteConfig } from "@/config/site";
-import dynamic from "next/dynamic";
-import { Suspense } from "react";
-const DiscoverListGroup = dynamic(() => import("@/components/sections/Discover/ListGroup"));
+import React, { Suspense } from "react";
 
-export const metadata: Metadata = {
-  title: `Discover Movies | ${siteConfig.name}`,
-};
+const DiscoverListGroup = React.lazy(() => import("@/components/sections/Discover/ListGroup"));
 
-const DiscoverPage: NextPage = () => {
+const DiscoverPage = () => {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="flex items-center justify-center min-h-[50vh]">Loading...</div>}>
       <DiscoverListGroup />
     </Suspense>
   );

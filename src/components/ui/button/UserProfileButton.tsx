@@ -4,7 +4,7 @@ import useSupabaseUser from "@/hooks/useSupabaseUser";
 import { DropdownItemProps } from "@/types/component";
 import { env } from "@/utils/env";
 import { Gear, Logout, User } from "@/utils/icons";
-import { useRouter } from "@bprogress/next/app";
+import { useNavigate, Link } from "react-router-dom";
 import {
   addToast,
   Avatar,
@@ -15,11 +15,10 @@ import {
   DropdownTrigger,
   Spinner,
 } from "@heroui/react";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 
 const UserProfileButton: React.FC = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [logout, setLogout] = useState(false);
   const { data: user, isLoading } = useSupabaseUser();
   const { mobile } = useBreakpoints();
@@ -42,14 +41,14 @@ const UserProfileButton: React.FC = () => {
           if (!success) {
             return setLogout(false);
           }
-          return router.push("/auth");
+          return navigate("/auth");
         },
         icon: logout ? <Spinner size="sm" color="danger" /> : <Logout />,
         color: "danger",
         className: "text-danger",
       },
     ],
-    [logout],
+    [logout, navigate],
   );
 
   if (isLoading) return null;
@@ -61,7 +60,7 @@ const UserProfileButton: React.FC = () => {
     <Button
       title={guest ? "Login" : user.username}
       variant="light"
-      href={guest ? "/auth" : undefined}
+      to={guest ? "/auth" : undefined}
       as={guest ? Link : undefined}
       isIconOnly={guest || mobile}
       endContent={

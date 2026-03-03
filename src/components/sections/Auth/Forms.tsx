@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useEffect, useMemo } from "react";
 import { tmdb } from "@/api/tmdb";
 import ThreeDMarquee from "@/components/ui/background/ThreeDMarquee";
 import IconButton from "@/components/ui/button/IconButton";
@@ -11,29 +12,36 @@ import { getImageUrl } from "@/utils/movies";
 import { addToast, Card, CardBody, CardHeader, ScrollShadow, Spinner } from "@heroui/react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { parseAsBoolean, parseAsStringLiteral, useQueryState } from "nuqs";
-import { useEffect, useMemo } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import AuthForgotPasswordForm from "./ForgotPassword";
 import AuthLoginForm from "./Login";
 import AuthRegisterForm from "./Register";
 import AuthResetPasswordForm from "./ResetPassword";
 
 const ValidForms = ["login", "register", "forgot"] as const;
+type ValidForm = (typeof ValidForms)[number];
 
 export interface AuthFormProps {
-  setForm: (form: (typeof ValidForms)[number]) => void;
+  setForm: (form: ValidForm) => void;
 }
 
 const AuthForms: React.FC = () => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const reset = pathname === "/auth/reset-password";
 
-  const [error, setError] = useQueryState("error", parseAsBoolean.withDefault(false));
-  const [form, setForm] = useQueryState(
-    "form",
-    parseAsStringLiteral(ValidForms).withDefault("login"),
-  );
+  const error = searchParams.get("error") === "true";
+  const form = (searchParams.get("form") as ValidForm) || "login";
+
+  const setForm = (newForm: ValidForm) => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (newForm === "login") {
+      nextParams.delete("form");
+    } else {
+      nextParams.set("form", newForm);
+    }
+    setSearchParams(nextParams);
+  };
 
   const { data: movies, isPending: isPendingMovies } = useQuery({
     queryFn: () => tmdb.trending.trending("movie", "day"),
@@ -62,13 +70,21 @@ const AuthForms: React.FC = () => {
         title: "An error occurred. Please try again.",
         color: "danger",
       });
-      setError(false);
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete("error");
+      setSearchParams(nextParams);
     }
-  }, [error]);
+  }, [error, searchParams, setSearchParams]);
 
   if (isPendingMovies || isPendingTv) {
     return <Spinner size="lg" className="absolute-center" variant="simple" />;
   }
+
+  const formComponents: Record<ValidForm, React.ReactNode> = {
+    login: <AuthLoginForm setForm={setForm} />,
+    register: <AuthRegisterForm setForm={setForm} />,
+    forgot: <AuthForgotPasswordForm setForm={setForm} />,
+  };
 
   return (
     <div
@@ -110,11 +126,7 @@ const AuthForms: React.FC = () => {
                   {reset ? (
                     <AuthResetPasswordForm />
                   ) : (
-                    {
-                      login: <AuthLoginForm setForm={setForm} />,
-                      register: <AuthRegisterForm setForm={setForm} />,
-                      forgot: <AuthForgotPasswordForm setForm={setForm} />,
-                    }[form]
+                    formComponents[form]
                   )}
                 </CardBody>
               </motion.div>

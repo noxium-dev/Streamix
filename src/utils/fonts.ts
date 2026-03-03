@@ -1,30 +1,22 @@
-import {
-  Poppins as FontPoppins,
-  Saira as FontSaira,
-  Oswald as FontOswald,
-  PT_Sans_Narrow as FontPTSansNarrow,
-} from "next/font/google";
+// Refactored for Vite: Standard font definitions
+// We will import these fonts in global.css instead of using Next.js font optimization
 
-export const Poppins = FontPoppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+export const Poppins = {
+  className: "font-poppins",
   variable: "--font-poppins",
-});
+};
 
-export const Saira = FontSaira({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+export const Saira = {
+  className: "font-saira",
   variable: "--font-saira",
-});
+};
 
-export const Oswald = FontOswald({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+export const Oswald = {
+  className: "font-oswald",
   variable: "--font-oswald",
-});
+};
 
-export const PTSansNarrow = FontPTSansNarrow({
-  subsets: ["latin"],
-  weight: ["400", "700"],
+export const PTSansNarrow = {
+  className: "font-pt-sans-narrow",
   variable: "--font-pt-sans-narrow",
-});
+};

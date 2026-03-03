@@ -1,5 +1,3 @@
-"use server";
-
 import { tmdb } from "@/api/tmdb";
 import { UnifiedPlayerEventData } from "@/hooks/usePlayerEvents";
 import { ActionResponse } from "@/types";

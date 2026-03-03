@@ -1,20 +1,21 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
 
-# testing
-/coverage
+# build
+/dist
+/build
+/out
 
-# next.js
+# wrangler
+.wrangler/
+
+# next.js (deprecated)
 /.next/
-/out/
 
 # production
-/build
 /public/**/sw*.js
 /public/**/workbox*.js
 
@@ -22,8 +23,6 @@
 .DS_Store
 *.pem
 *.bat
-
-# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -32,9 +31,9 @@ yarn-error.log*
 .env
 .env*.local
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vite
+vite.config.ts.timestamp-*

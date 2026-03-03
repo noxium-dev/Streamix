@@ -1,11 +1,9 @@
 "use client";
 
-import BackButton from "@/components/ui/button/BackButton";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/utils/helpers";
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, NavbarMenu, NavbarMenuItem, NavbarMenuToggle } from "@heroui/react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import UserProfileButton from "../button/UserProfileButton";
 import SearchInput from "../input/SearchInput";
@@ -13,12 +11,12 @@ import ThemeSwitchDropdown from "../input/ThemeSwitchDropdown";
 import BrandLogo from "../other/BrandLogo";
 
 const NavItemWithIcon = ({ item }: { item: typeof siteConfig.navItems[0] }) => {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
   const isActive = pathname === item.href;
   
   return (
     <Link 
-      href={item.href} 
+      to={item.href} 
       className={cn(
         "flex items-center gap-2 rounded-lg px-3 py-2 text-base font-medium transition-colors",
         isActive 
@@ -33,14 +31,14 @@ const NavItemWithIcon = ({ item }: { item: typeof siteConfig.navItems[0] }) => {
 };
 
 const HeaderSearch = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setQuery(value);
     if (value.trim()) {
-      router.push(`/search?q=${encodeURIComponent(value.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(value.trim())}`);
     }
   };
 
@@ -55,11 +53,8 @@ const HeaderSearch = () => {
 };
 
 const TopNavbar = () => {
-  const pathName = usePathname();
+  const { pathname: pathName } = useLocation();
   const navItems = siteConfig.navItems.filter(item => item.href !== "/search");
-  const hrefs = navItems.map((item) => item.href);
-  const show = hrefs.includes(pathName) || pathName === "/search" || pathName.startsWith("/watch/");
-  const tv = pathName.includes("/tv/");
   const player = pathName.includes("/player");
   const auth = pathName.includes("/auth");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,16 +74,14 @@ const TopNavbar = () => {
       className="bg-background/80 backdrop-blur-md"
     >
       <NavbarBrand className="flex-shrink-0">
-        {show ? <BrandLogo /> : <BackButton href={tv ? "/?content=tv" : "/"} />}
+        <BrandLogo />
       </NavbarBrand>
       
-      {show && (
-        <nav className="hidden lg:flex items-center gap-2">
-          {navItems.map((item) => (
-            <NavItemWithIcon key={item.href} item={item} />
-          ))}
-        </nav>
-      )}
+      <nav className="hidden lg:flex items-center gap-2">
+        {navItems.map((item) => (
+          <NavItemWithIcon key={item.href} item={item} />
+        ))}
+      </nav>
       
       <NavbarContent justify="end" className="gap-2">
         <NavbarItem>

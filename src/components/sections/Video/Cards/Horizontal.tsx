@@ -47,13 +47,14 @@ const HorizontalVideoCard: React.FC<HorizontalVideoCardProps> = ({ video }) => {
             {formatDuration(video.duration)}
           </div>
         </div>
-        <div className="flex flex-col gap-1 p-2">
-          <h6 className="line-clamp-2 text-sm font-medium leading-tight group-hover:text-primary transition-colors">
-            {video.name}
-          </h6>
-          <div className="flex items-center gap-2 text-[11px] text-default-500">
-            <span>{video.resolution}</span>
-            <span>•</span>
+        <div className="flex flex-col gap-1.5 p-2 px-0.5">
+          <Tooltip content={video.name} delay={500} closeDelay={0} placement="top" offset={10}>
+            <h6 className="truncate text-sm font-semibold leading-tight group-hover:text-primary transition-colors px-1">
+              {video.name}
+            </h6>
+          </Tooltip>
+          <div className="flex items-center justify-between text-[11px] text-default-500 font-medium px-1">
+            <span className="bg-default-100 px-1.5 py-0.5 rounded text-default-600">{video.resolution}</span>
             <span>{new Date(video.createdAt).toLocaleDateString()}</span>
           </div>
         </div>

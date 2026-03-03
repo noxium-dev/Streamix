@@ -2,12 +2,11 @@
 
 import { siteConfig } from "@/config/site";
 import clsx from "clsx";
-import { Link } from "@heroui/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation } from "react-router-dom";
 import { Chip } from "@heroui/chip";
 
 const BottomNavbar = () => {
-  const pathName = usePathname();
+  const { pathname: pathName } = useLocation();
   const hrefs = siteConfig.navItems.map((item) => item.href);
   const show = hrefs.includes(pathName);
 
@@ -19,7 +18,7 @@ const BottomNavbar = () => {
               const isActive = pathName === item.href;
               return (
                 <Link
-                  href={item.href}
+                  to={item.href}
                   key={item.href}
                   className="flex items-center justify-center text-foreground"
                 >

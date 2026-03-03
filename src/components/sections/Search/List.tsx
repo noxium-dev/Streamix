@@ -39,7 +39,7 @@ const SearchList = () => {
       enabled: triggered,
       queryKey: ["search-list", content, submittedSearchQuery],
       queryFn: ({ pageParam: page }) =>
-        fetchData({ page, type: content, query: submittedSearchQuery }),
+        fetchData({ page, type: content as ContentType, query: submittedSearchQuery }),
       initialPageParam: 1,
       getNextPageParam: (lastPage) =>
         lastPage.metadata.currentPage < lastPage.metadata.maxPage 
@@ -96,7 +96,7 @@ const SearchList = () => {
     <div className="flex flex-col items-center gap-8">
       <SearchFilter
         isLoading={isFetching}
-        onSearchSubmit={(value) => setSubmittedSearchQuery(value.trim())}
+        onSearchSubmit={(value: string) => setSubmittedSearchQuery(value.trim())}
       />
       {triggered && (
         <>

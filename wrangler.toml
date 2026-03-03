@@ -1,7 +1,9 @@
 name = "streamix"
 compatibility_date = "2024-11-18"
 compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
 
-[pages_build_config]
-build_command = "npm run pages:build"
-destination_dir = ".vercel/output"
+[[d1_databases]]
+binding = "DB"
+database_name = "vidstreaming-db"
+database_id = "a9c1cc14-a157-42d3-b01c-c9c536d6ebd2"

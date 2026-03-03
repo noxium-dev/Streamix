@@ -10,11 +10,11 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { AuthFormProps } from "./Forms";
 import { env } from "@/utils/env";
-import { useRouter } from "@bprogress/next/app";
+import { useNavigate } from "react-router-dom";
 import GoogleLoginButton from "@/components/ui/button/GoogleLoginButton";
 
 const AuthLoginForm: React.FC<AuthFormProps> = ({ setForm }) => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(false);
 
   const {
@@ -50,7 +50,7 @@ const AuthLoginForm: React.FC<AuthFormProps> = ({ setForm }) => {
       return;
     }
 
-    return router.push("/");
+    return navigate("/");
   });
 
   const onCaptchaSuccess = useCallback(

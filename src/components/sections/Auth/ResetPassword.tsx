@@ -4,7 +4,7 @@ import { ResetPasswordFormSchema } from "@/schemas/auth";
 import { env } from "@/utils/env";
 import { isEmpty } from "@/utils/helpers";
 import { LockPassword } from "@/utils/icons";
-import { useRouter } from "@bprogress/next/app";
+import { useNavigate } from "react-router-dom";
 import { addToast, Button } from "@heroui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Turnstile } from "@marsidev/react-turnstile";
@@ -12,7 +12,7 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 
 const AuthResetPasswordForm: React.FC = () => {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [isVerifying, setIsVerifying] = useState(false);
 
   const {
@@ -49,7 +49,7 @@ const AuthResetPasswordForm: React.FC = () => {
       return;
     }
 
-    return router.push("/");
+    return navigate("/");
   });
 
   const onCaptchaSuccess = useCallback(

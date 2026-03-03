@@ -41,7 +41,7 @@ const VideoHomeList: React.FC<VideoHomeListProps> = ({ query, name, param }) => 
           <div className="flex grow items-center justify-between">
             <SectionTitle>{name}</SectionTitle>
             <a
-              href="/discover"
+              href="/videos"
               className="text-sm text-foreground hover:text-primary"
             >
               See All &gt;
